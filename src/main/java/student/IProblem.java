@@ -2,7 +2,9 @@ package student;
 
 import java.util.List;
 
-import graph.*;
+import graph.Edge;
+import graph.Graph;
+import graph.WeightedGraph;
 
 /**
  * This interface describes the three tasks you are supposed to solve for this
@@ -23,7 +25,7 @@ public interface IProblem {
 	 *            build
 	 * @return a list of edges that form a minimum spanning tree
 	 */
-    <V, E extends Comparable<E>> List<Edge<V>> mst(WeightedGraph<V, E> g);
+    public <V, E extends Comparable<E>> List<Edge<V>> mst(WeightedGraph<V, E> g);
 
 	/**
 	 * Compute the best point for the power company to start searching for the cause
