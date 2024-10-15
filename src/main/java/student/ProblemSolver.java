@@ -1,8 +1,12 @@
 package student;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Set;
+import java.util.Stack;
 
 import graph.Edge;
 import graph.Graph;
@@ -19,7 +23,7 @@ public class ProblemSolver implements IProblem {
         V vertex = g.getFirstNode(); //O(1)
         found.add(vertex); //O(1)
 
-        for (Edge<V> edge : g.adjacentEdges(vertex)) { //en node: O(degree(v)), hele: O(2m)
+        for (Edge<V> edge : g.adjacentEdges(vertex)) { //O(degree(v))/2m
             toSearch.add(edge); //O(log(m))
         }
         while (!toSearch.isEmpty()) { //O(m)
@@ -33,7 +37,7 @@ public class ProblemSolver implements IProblem {
                 mst.add(edge); //O(1)
                 found.add(edge.b); //O(1)
 
-                for (Edge<V> newEdge : g.adjacentEdges(edge.b)) { //en node: O(degree(b)), hele: O(2m)
+                for (Edge<V> newEdge : g.adjacentEdges(edge.b)) { //O(degree(b))/2m
                     toSearch.add(newEdge); //O(log(m))
                 }
             }
@@ -42,9 +46,37 @@ public class ProblemSolver implements IProblem {
     }
 
     @Override
-    public <V> V lca(Graph<V> g, V root, V u, V v) {
-        // Implement me :)
-        return null;
+    public <V> V lca(Graph<V> g, V root, V u, V v) { //O(n)
+        Map<V, V> parent = new HashMap<>(); //O(1)
+        dfs(g, root, parent); //O(n)
+
+        Set<V> ancestors = new HashSet<>(); //O(1)
+        while (u != null) { //O(n)
+            ancestors.add(u); //O(1)
+            u = parent.get(u); //O(1)
+        }
+        while (!ancestors.contains(v)) { //O(n)
+            v = parent.get(v); //O(1)
+        }
+
+        return v; //O(1)
+    }
+
+    private <V> void dfs(Graph<V> g, V root, Map<V, V> parent) { //O(n)
+        Stack<V> toSearch = new Stack<>(); //O(1)
+        toSearch.push(root); //O(1)
+        parent.put(root, null); //O(1)
+
+        while (!toSearch.isEmpty()) { //O(n)
+            V node = toSearch.pop(); //O(1)
+
+            for (V neighbor : g.neighbours(node)) { ////O(m * degree(node)) = O(n) fordi tre har n-1 kanter. 
+                if (!parent.containsKey(neighbor)) { //O(1)
+                    toSearch.push(neighbor); //O(1)
+                    parent.put(neighbor, node); //O(1)
+                }
+            }
+        }
     }
 
     @Override

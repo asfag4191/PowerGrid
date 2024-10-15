@@ -20,7 +20,18 @@ Hvis kanten har en node den ikke innholder fra før (altså node b som er den no
 Fortsetter til alle kantene er koblet sammen uten sykel, og returner mst, kanter som har minst vekt. Altså funnet den billigste kostnaden til å lage dette nettet med strøm.    *
 
 ## Task 2 - lca
-*Enter description*
+*Jeg starter med å implementere dfs, ettersom jeg ser at vi må ned i dybden på treet. Jeg oppretter da et HashMap, hvor verdien er foreldrene og nøkkelen er naboene som vi går gjennom. Dette må jeg gjøre for jeg vil lagre hele mappet med hva som er 'foreldre' og hva som er 'barn'. Noe jeg kan bruke når jeg skal finne om to noder har samme foreldre. 
+
+Jeg startet å lage et iterativt dfs først, men så at dette tar O(n+m) tid, altså besøker hver node en gang og går gjennom alle kantene. Jeg så og fra en oppgave gjennomgang den rekrusive metoden, prøvde denne ut men foretrekker den iterative metoden ettersom jeg syntes den er mer forståelig. 
+
+Oppretter da e stack, (First in last out). Vil jo fylle hele mappet med alle noder så starter fra root (starten), og setter da at root ikke har foreldre ettersom dette er jo den første vi søker fra. While løkken så lenge toSearch ikke er tom, så lenge det er noe å søke gjennom i dybden. Iterer over alle naboene til den nåværende node. Hvis hashmappet ikke har denne naboen i seg, altså verdien (noden vi kommer fra, foreldrenoden) ikke har en lignende tilhørende verdi (naboen), må vi legge denne til i toSearch for å søke gjennom, og legge til i mappet for å registrere hvilken node som er foreldre til da denne naboen. 
+
+Da for lca, tenkte jeg at jeg må sjekke for alle u og v om de har noen like forfedre (ancestors). Derfor tar jeg å lagrer alle ancestors til u i et sett, og deretter finne alle forfedrene til v og ser om det er noe sammenheng med dem i settet til u. Altså for hver foreldre jeg finner for v, sjekker om det er sammenheng med forfedrene i u. 
+
+ Går da oppover altså i motsatt rekkefølge. siden jeg har u=/v=parent.get(v/u), henter foreldrene til noden u eller v fra parent kartet. Dette lar oss finne det første punktet hvor to deler felles foreldre. Dette skjer siden ancestors som er et Hashset av u, kan da ikke ha duplikater i seg, som gjør at den da returnerer v. SOm vil være den minste, siden fra bunnen og opp. Følger stien fra deres forfedre opp til roten. 
+
+
+  *
 
 ## Task 3 - addRedundant
 *Enter description*
@@ -36,7 +47,7 @@ For each method of the different strategies give a runtime analysis in Big-O not
     Oppretter PrioriteyQueue som tar O(m) tid: Hvis jeg oppretter en tom prioritetskø vil det ta O(1) tid, men jeg oppretter en prioritetskø med alle kantene. Bruker Weightedgraph sin 'edges' metode, til å hente alle kanter i grafer.
 
     En for loop for å sjekke alle kanter som er knyttet til den første noden. Bruker da O(degree(v)) tid, ettersom 'g.adjacentEdges(vertex)' returnerer en en iterable av alle kanter som da tilhører til noden v. Sjekker kun de kantene som er koblet til noden, altså ikke alle m-kantene i grafen. Avhenger da av antall kanter som går fra noden v. 
-    
+
     O(degree(v)): for hver node
     O(2m): for alle noder, sum av gradtall til hver node. 
     add(): alltid kjøretid O(logm) for vi legger til alle kantene som vi har funnet, som da hører til denne noden vi har sjekket for. 
@@ -55,7 +66,22 @@ For each method of the different strategies give a runtime analysis in Big-O not
 
     **
 * ``lca(Graph<T> g, T root, T u, T v)``: O(?)
-    * *Insert description of why the method has the given runtime*
+    * *
+    dfs:
+    Starter med å opprette stack som tar O(1) tid, legge til starnoden (root), O(1) tid, og legge dette til i mappet tar O(1) tid. 
+
+    while løkken tar O(n) tid ettersom den iterere over alle nodene i toSearch. Fjerne den første noden tar O(1) tid. 
+
+    for-løkken går gjennom alle kantene til noden, for en generell graf ville denne tatt (O(m)) tid totalt, ettersom vi iterer over alle nodene en gang. Men i et tre slik som vi har, for n noder er det n-1 kanter. Derfor blir kjøretiden da O(m), hvor m=n-1, kan vi si kjøretiden da er O(n) for treet. 
+
+    Så alt i alt tar dfs søket for et tre O(n) tid. 
+
+    lca vil jo da ta O(n) kjøretid, ettersom den kaller på dfs O(n) og har to seperate while løkker. While løkkene traverserer og må i værste fall da ta O(n) tid, gå gjennom alle nodene. 
+    
+    O(n)+O(n)+O(n)=O(3n)=O(n)
+
+    Oppsummert: O(n)+O(n)=O(2n)=O(n)
+    *
 * ``addRedundant(Graph<T> g, T root)``: O(?)
     * *Insert description of why the method has the given runtime*
 
