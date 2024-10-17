@@ -80,106 +80,96 @@ public class ProblemSolver implements IProblem {
         }
     }
 
-	@Override
-	public <V> Edge<V> addRedundant(Graph<V> g, V root) {
-		Map<V, Integer> subTree = SubTreeSize(g, root);
-	
-		V firstNode = null, secondNode = null;
-		int maxSubTreeSize1 = 0, maxSubTreeSize2 = 0;
-	
-		for (V child : g.neighbours(root)) {
-			int childSize = subTree.get(child);
-			if (childSize > maxSubTreeSize1) {
-				maxSubTreeSize2 = maxSubTreeSize1;
-				secondNode = firstNode;
-	
-				maxSubTreeSize1 = childSize;
-				firstNode = child;
-			} else if (childSize > maxSubTreeSize2) {
-				maxSubTreeSize2 = childSize;
-				secondNode = child;
-			}
-		}
-	
-		V deepestFirstNode = deepestNodeWithMostChildren(g, subTree, firstNode);
-		V deepestSecondNode = deepestNodeWithMostChildren(g, subTree, secondNode);
-	
-		return new Edge<>(deepestFirstNode, deepestSecondNode);
-	}
-	
-	
-    // Metode som mapper dybden og størrelsen til treet for hver node
+    @Override
+    public <V> Edge<V> addRedundant(Graph<V> g, V root) {
+        Map<V, Integer> subTree = SubTreeSize(g, root); //O(n)
+        V firstNode = root; //O(1)
+        V secondNode = root; //O(1)		
+        Integer firstSubTree = 0; //O(1)
+        Integer secondSubTree = 0; //O(1)
 
-    private <V> Map<V, Integer> SubTreeSize(Graph<V> g, V root) {
-        HashMap<V, Integer> subTree = new HashMap<>();
-        Set<V> found = new HashSet<>();  // Set for å spore besøkte noder
-        Calculatedepth(g, root, found, subTree);  // Riktig parametere
-        return subTree;
+        if (g.degree(root) == 1) {
+            secondNode = deepestNodeWithMostChildren(g, subTree, root); //O(n)
+        } else {
+            for (V node : g.neighbours(root)) { //O(degree)
+                Integer nodeSize = subTree.get(node); //O(1)
+                if (nodeSize > firstSubTree) { //O(1)
+                    secondSubTree = firstSubTree; //O(1)
+                    secondNode = firstNode; //O(1)
+
+                    firstSubTree = nodeSize; //O(1)
+                    firstNode = node; //O(1)
+                } else if (nodeSize > secondSubTree) { //O(1)
+                    secondSubTree = nodeSize; //O(1)
+                    secondNode = node; //O(1)
+                }
+            }
+            firstNode = deepestNodeWithMostChildren(g, subTree, firstNode); //O(n)
+            secondNode = deepestNodeWithMostChildren(g, subTree, secondNode); //O(n)
+        }
+
+        return new Edge<V>(firstNode, secondNode);
     }
 
-// Beregner dybden og størrelsen til treet ved DFS for hver node
-    private <V> void Calculatedepth(Graph<V> g, V node, Set<V> found, Map<V, Integer> subTree) {
-        Stack<V> toSearch = new Stack<>();  // Holder styr på nodene som skal søkes
-        Stack<V> reversed = new Stack<>();  // Må telle fra bunn og opp for å finne størrelsen på deltrærne
+	//Beregner størrelsen til alle noder i treet
+    private <V> Map<V, Integer> SubTreeSize(Graph<V> g, V root) { //O(n)
+        HashMap<V, Integer> subTree = new HashMap<>(); //O(1)
+        Set<V> found = new HashSet<>();  ///O(1)
+        Calculatedepth(g, root, found, subTree); //O(n)
+        return subTree; //O(1)
+    }
 
-        // Start DFS fra roten eller startnoden
+	//Beregner dybden og størrelsen til alle noder i treet
+    private <V> void Calculatedepth(Graph<V> g, V node, Set<V> found, Map<V, Integer> subTree) {
+        Stack<V> toSearch = new Stack<>();  // O(1)
+        Stack<V> reversed = new Stack<>();  //O(1)
+
         toSearch.push(node);
         found.add(node);
 
-        // DFS-besøk av alle noder
-        while (!toSearch.isEmpty()) {
+        while (!toSearch.isEmpty()) { //O(n)
             V currentNode = toSearch.pop();
-            reversed.push(currentNode);  // Legger til i post-order
+            reversed.push(currentNode);  
 
-            // Gå gjennom naboene til noden
-            for (V neighbour : g.neighbours(currentNode)) {
+            for (V neighbour : g.neighbours(currentNode)) { //O(degree*n)=O(n)
                 if (!found.contains(neighbour)) {
-                    toSearch.push(neighbour);  // Legger til naboene i stakken
-                    found.add(neighbour);      // Legger til naboene i "funnet"
+                    toSearch.push(neighbour); 
+                    found.add(neighbour);   
                 }
             }
         }
 
-        // Reversed behandling
-        while (!reversed.isEmpty()) {
-            V nodeFromReversed = reversed.pop();  // Henter den siste noden (bladnode eller fått alle barn behandlet)
-            int size = 1;  // Starter å telle med seg selv
+        while (!reversed.isEmpty()) { //O(n)
+            V nodeFromReversed = reversed.pop();
+            int size = 1; 
 
-            // Gå gjennom naboene for å finne størrelsen på deltrærne
-            for (V neighbour : g.neighbours(nodeFromReversed)) {
+            for (V neighbour : g.neighbours(nodeFromReversed)) { //O(degree*n)=O(n)
                 if (subTree.containsKey(neighbour)) {
-                    size += subTree.get(neighbour);  // Legger til størrelsen på barnenodenes subtre
+                    size += subTree.get(neighbour);  
                 }
             }
 
-            subTree.put(nodeFromReversed, size);  // Legger til størrelsen på deltrærne i kartet
-            System.out.println(".");  // For debugging (kan fjernes)
-        }
+            subTree.put(nodeFromReversed, size); //O(1)
     }
-
-	//Finne den dypeste noden med det største sub treet. 
-	private <V> V deepestNodeWithMostChildren(Graph<V> g, Map<V, Integer> subTree, V firstNode) {
-		Integer currentScore = subTree.get(firstNode); // Hent størrelsen på subtreet for noden
-		if (currentScore == 1) return firstNode;  // Hvis noden er en bladnode, returner den
-		
-		Integer bestScore = 0;
-		V bestNode = firstNode;
-	
-		// Gå gjennom naboene for å finne barnet med det største subtreet
-		for (V child : g.neighbours(firstNode)) {
-			Integer childScore = subTree.get(child);  // Størrelsen på barnets subtre
-			if (childScore > currentScore) continue;  // Ikke gå tilbake til foreldre-noder
-			else if (childScore > bestScore) {
-				bestScore = childScore;
-				bestNode = child;  // Velg barnet med det største subtreet
-			}
-		}
-	
-		// Rekursivt gå nedover til du finner den dypeste noden med det største subtreet
-		return deepestNodeWithMostChildren(g, subTree, bestNode);
 	}
+	//Finner den noden som er lengst unna roten og har flest barn
+    private <V> V deepestNodeWithMostChildren(Graph<V> g, Map<V, Integer> subTree, V currentNode) { //O(n)
+        Integer currentScore = subTree.get(currentNode); //O(1)
+        if (currentScore == 1) {
+            return currentNode;  
+        }
+        Integer bestScore = 0;
+        V bestNode = currentNode;
+
+        for (V child : g.neighbours(currentNode)) { //O(degree)
+            Integer childScore = subTree.get(child); 
+            if (childScore > currentScore) {
+                continue; 
+             }else if (childScore > bestScore) {
+                bestScore = childScore;
+                bestNode = child;
+            }
+        }
+        return deepestNodeWithMostChildren(g, subTree, bestNode);
+    }
 }
-
-    
-
-    //dypeste node med flest barn 

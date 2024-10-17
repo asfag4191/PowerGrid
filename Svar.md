@@ -34,7 +34,45 @@ Da for lca, tenkte jeg at jeg må sjekke for alle u og v om de har noen like for
   *
 
 ## Task 3 - addRedundant
-*Enter description*
+*Jeg fant ut at jeg måtte ned i dybden på treet og finne den dypeste noden som hadde flest barn festet til seg, viste da at hvis denne noden røyk ville flere hus miste strøm, ettersom flere var koblet opp til denne. Så tenkte jeg at hvis jeg fant denne noden kunne jeg legge da til en kant i denne noden og en annen viktig node. 
+
+Calculatedepth:   
+Jeg vil da beregne størrelsen på deltærene til hver node. Bruker da en iterativ dfs, slik jeg brukte i forrige oppgave. Ettersom denne er god på å søke dypt i treet. Jeg må da ha et set som har oversikt over de nodene jeg har besøkt, og et map som lagrer størrelsen (en int siden telling) på deltreet til for hver node (inkluderer noden seg selv). Disse har jeg som da parametere slik at endringen blir tilgjengelig for de andre metodene
+
+Oppretter en stack som jeg skal søke gjennom og en stack 'reversed', som jeg bruker når jeg skal telle størrelesen på deltrærne. I toSearch er det lik dfs som forrige, men derimot her legger jeg til den noden vi søker på i reversed, ettersom det er en stack er det 'First in Last out' prinsippet. Altså toppen blir lagt i bunnen av haugen, slik jeg får det 'reversed' når jeg skal telle gjennom.
+
+I reversed vil nodene bli behandlet i motsatt rekkefølge enn hva de ble behandlet som i toSearch. Altså går fra nodene og opp til forelderen. Jeg vil da starte med å hente toppen av stacken, som i dette tilfellet er det siste barnet/naboen fra toSearch. Lager en telle verdi, og setter denne til 1 siden vil telle med seg selv. Iterer over naboene til denne noden, og sjekker om mappet subtree har denne nøkkelen til verdien sin. Verdien er da noden, så hvis den ikke har denne verdien vil vi øke nøekkelen (størrelsen) på subTree. Altså sikrer at barn behandles før foreldre, og teller hvor mange noder som er festet til en foreldre. 
+
+deepestNodeWithMostChildren: 
+Starter med å hente størrelsen på den nåværende noden jeg jobber med, henter størrelsen fra subTree, altså størrelsen på hele subTreet.
+
+Vet at hvis størrelsen er 1 for noden, så er dette en bladnode så returerer den nåværende noden. 
+bestScore holder på det største subtreet vi har funnet så langt blant barne nodene, og holder på den beste nden vi har funnet så langt. 
+
+Går da gjennom en for-løkke og sjekker om hvis størrelsem på subTree er større blant barnenoden enn den nåværende noden vi jobber med, ignorerer vi for å unngå å gå tilbake til en foreldre. Dersom subTreet sin score er bedre enn den beste scoren vi har funnet så langt, oppdaterer vi både bestScore og bestNode. 
+
+returnerer da noden med det største subTreet. 
+
+subTreeSize:
+Beregner subtestørrelsen i hele treet, blir brukt i deepestNodeWithMostChildren, som bruker dette til å finne den dypeste noden med det største subtreet, ved å sjekke størrelsen på barnenoder. Returnerer map som viser størrelsen på subTrerne for alle noder i treet. 
+
+addRenduntant: 
+Denne vil da finne de to nodene, som hvis vi legger til en kant mellom, vil minimere antall hus som mister strøm. 
+
+Starter med å lagre størrelsen for hver node i grafen i et map, et map hvor jeg kan slå opp og se hvor mange noder som finnes i subTreet til enhver node. Altså starter å utføre en DFS fra roten. 
+
+Hvis roten kun har en nabo, må vi finne den dypeste noden med flest barn, ved bruk av 'deepestNodeWithMostChildren'. (må gå dypere ned i treet for å finne en annen node å sammenligne med). Hvis roten har flere naboer må vi da gå gjennom alle nodene til root og henter størrelsen på barna sine subtrær fra subTre. Må deretter sammenligne subtrestørrelsene for å finne de to størse subtrærne. 
+
+Etter å ha funnet de to største subtrærne må vi finne den dypeste noden av disse som har flest barne noder. 
+
+til slutt returnerer vi en kant som kobler sammen disse nodene vi fant som kritiske 
+
+Oppsummering: 
+1. Beregner størrelse på subtrærne med DFS
+2. Finne de to største subtrærne
+3. For disse største subtrærene finner jeg noden med flest barn blant dem. 
+4. Returnerer kanten mellom de to nodene som er dypest og med flest barne-noder.
+   *
 
 
 # Runtime Analysis
@@ -77,11 +115,11 @@ For each method of the different strategies give a runtime analysis in Big-O not
     Så alt i alt tar dfs søket for et tre O(n) tid. 
 
     lca vil jo da ta O(n) kjøretid, ettersom den kaller på dfs O(n) og har to seperate while løkker. While løkkene traverserer og må i værste fall da ta O(n) tid, gå gjennom alle nodene. 
-    
+
     O(n)+O(n)+O(n)=O(3n)=O(n)
 
     Oppsummert: O(n)+O(n)=O(2n)=O(n)
     *
 * ``addRedundant(Graph<T> g, T root)``: O(?)
-    * *Insert description of why the method has the given runtime*
+    * *  *
 
