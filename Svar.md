@@ -3,7 +3,7 @@
 Briefly describe your implementation of the different methods. What was your idea and how did you execute it? If there were any problems and/or failed implementations please add a description.
 
 ## Task 1 - mst
-*Så at dette var et tilfelle av 'minimum spanning tree', så jeg valgte å bruke Prim's algoritme som vi har gått gjennom i Forelesning. Denne vil da finne MST
+*Så at dette var et tilfelle av 'minimum spanning tree', så jeg valgte å bruke Prim's algoritme som vi har gått gjennom i forelesning. Denne vil da finne MST
 i en vektet graf, vil forbinde alle noder i et tre med minst vekt og ingen sykler. 
 
 Jeg har jo da 2 implementasjoner som jeg fokuserer på, found og toSearch. Found gjør jeg til å være et HashSet, siden jeg ikke vil legge til to noder som er 
@@ -20,28 +20,42 @@ Hvis kanten har en node den ikke innholder fra før (altså node b som er den no
 Fortsetter til alle kantene er koblet sammen uten sykel, og returner mst, kanter som har minst vekt. Altså funnet den billigste kostnaden til å lage dette nettet med strøm.    *
 
 ## Task 2 - lca
-*Jeg starter med å implementere dfs, ettersom jeg ser at vi må ned i dybden på treet. Jeg oppretter da et HashMap, hvor verdien er foreldrene og nøkkelen er naboene som vi går gjennom. Dette må jeg gjøre for jeg vil lagre hele mappet med hva som er 'foreldre' og hva som er 'barn'. Noe jeg kan bruke når jeg skal finne om to noder har samme foreldre. 
+*Jeg starter med å implementere dfs, ettersom jeg ser at vi må ned i dybden på treet. Jeg opprettet et HashMap hvor nøkkelen representerer en node, og verdien er nodens "forelder" i treet. Gjør dette fordi jeg må holde styr på hvilke noder som er foreldre til hvilke barn, noe som senere hjelper oss med å finne om to noder har felles forfedre.
 
-Jeg startet å lage et iterativt dfs først, men så at dette tar O(n+m) tid, altså besøker hver node en gang og går gjennom alle kantene. Jeg så og fra en oppgave gjennomgang den rekrusive metoden, prøvde denne ut men foretrekker den iterative metoden ettersom jeg syntes den er mer forståelig. 
+Jeg startet å lage en iterativ dfs:
 
-Oppretter da e stack, (First in last out). Vil jo fylle hele mappet med alle noder så starter fra root (starten), og setter da at root ikke har foreldre ettersom dette er jo den første vi søker fra. While løkken så lenge toSearch ikke er tom, så lenge det er noe å søke gjennom i dybden. Iterer over alle naboene til den nåværende node. Hvis hashmappet ikke har denne naboen i seg, altså verdien (noden vi kommer fra, foreldrenoden) ikke har en lignende tilhørende verdi (naboen), må vi legge denne til i toSearch for å søke gjennom, og legge til i mappet for å registrere hvilken node som er foreldre til da denne naboen. 
+Oppretter da en stack kalt toSearch (First in last out). Vil jo fylle hele mappet med alle noder så starter fra root (starten), og setter da at root ikke har foreldre ettersom dette er jo den første vi søker fra. 
+
+While løkken itererer så lenge toSearch ikke er tom, så lenge det er ndoer å utforske. Iterer over alle naboene til den nåværende noden. Hvis parent mappet ikke har denne naboen (har ikke besøkt noden før), legger til i stacken for videre utforsking. Må deretter legge til i parent-mappet for å registrere hvilken node som er foreldre til da denne naboen. 
 
 Da for lca, tenkte jeg at jeg må sjekke for alle u og v om de har noen like forfedre (ancestors). Derfor tar jeg å lagrer alle ancestors til u i et sett, og deretter finne alle forfedrene til v og ser om det er noe sammenheng med dem i settet til u. Altså for hver foreldre jeg finner for v, sjekker om det er sammenheng med forfedrene i u. 
 
- Går da oppover altså i motsatt rekkefølge. siden jeg har u=/v=parent.get(v/u), henter foreldrene til noden u eller v fra parent kartet. Dette lar oss finne det første punktet hvor to deler felles foreldre. Dette skjer siden ancestors som er et Hashset av u, kan da ikke ha duplikater i seg, som gjør at den da returnerer v. SOm vil være den minste, siden fra bunnen og opp. Følger stien fra deres forfedre opp til roten. 
-
-
+Går oppover fra v til roten ved hjelp av parent-mappet. Jeg bruker parent.get(v) for å hente forfedrene til v, gjør dette på samme måte for u. 
+ Dette lar oss finne det første punktet hvor to deler felles foreldre. Dette skjer siden ancestors som er et Hashset av u, kan da ikke ha duplikater i seg, som gjør at den da returnerer v, når den minste fordederen er funnet. Følger stien fra deres forfedre opp til roten. 
   *
 
 ## Task 3 - addRedundant
-*Jeg fant ut at jeg måtte ned i dybden på treet og finne den dypeste noden som hadde flest barn festet til seg, viste da at hvis denne noden røyk ville flere hus miste strøm, ettersom flere var koblet opp til denne. Så tenkte jeg at hvis jeg fant denne noden kunne jeg legge da til en kant i denne noden og en annen viktig node. 
+* Jeg må jo da finne to noder som hvi svi kobler disse sammen minimerer effektev av et strømbrudd. Hvis en kabel/kant i treet svikter så vil jo de husene/nodene som er koblet til denne miste strøm. Da ved å legge til en kabel/kant mellom de to dypeste nodene med flest barn, kan jeg få til å minimere utfallet av et strøbrudd. 
+
+addRedundant: 
+Dette er jo den metoden som finner de mest kritiske nodene i treet, hvis vi kobler dem sammen vil strømmen opprettholdes ved et strømbrudd. 
+Først starter jeg med å beregne størrelsen på undertrærne for hver node, ved SubTreeSize som gjør et dfs søk over hele treet. 
+Sjekker om roten bare har en nabo, finner den dypeste noden med flest barn ved 'deepestNodeWithMostChildren'. 
+Da blir den første noden roten av treet, som er kritisk siden det er her all strømmen kommer fra. 
+
+Hvis roten har flere naboer, går koden gjennom alle naboene og sammenligner størrelsen på undertrærene til alle nodene. De to største undertrærene vil da bli funnet, og finner den dypeste noden i hver av disse. Den returnerer til slutt den nye kanten mellom disse nodene. 
+
+SubTreeSize:
+Hjelpefunksjon jeg bruker til å beregne størrelse på alle undertrærne.  Den returnerer subTree, som inneholder hver node og størrelsen på sitt undertre. 
+
+Vi opretter found for å holde styr på hvilke noder vi har besøkt. Jeg kaller da på Calculatedepth metoden, som er en metode som faktisk beregner størrelsen på undertrærne. Denne fyller ut subTree mappet med størrelser på undertrærne, og deretter returneres da kartet med disse størrelsene. 
 
 Calculatedepth:   
-Jeg vil da beregne størrelsen på deltærene til hver node. Bruker da en iterativ dfs, slik jeg brukte i forrige oppgave. Ettersom denne er god på å søke dypt i treet. Jeg må da ha et set som har oversikt over de nodene jeg har besøkt, og et map som lagrer størrelsen (en int siden telling) på deltreet til for hver node (inkluderer noden seg selv). Disse har jeg som da parametere slik at endringen blir tilgjengelig for de andre metodene
+Jeg vil da beregne størrelsen på deltærene til hver node. Bruker da en iterativ dfs, slik jeg brukte i forrige oppgave. Jeg må da ha et set som har oversikt over de nodene jeg har besøkt, og et map som lagrer størrelsen (en int siden telling) på deltreet til for hver node (inkluderer noden seg selv). Disse har jeg som da parametere slik at endringen blir tilgjengelig for de andre metodene
 
 Oppretter en stack som jeg skal søke gjennom og en stack 'reversed', som jeg bruker når jeg skal telle størrelesen på deltrærne. I toSearch er det lik dfs som forrige, men derimot her legger jeg til den noden vi søker på i reversed, ettersom det er en stack er det 'First in Last out' prinsippet. Altså toppen blir lagt i bunnen av haugen, slik jeg får det 'reversed' når jeg skal telle gjennom.
 
-I reversed vil nodene bli behandlet i motsatt rekkefølge enn hva de ble behandlet som i toSearch. Altså går fra nodene og opp til forelderen. Jeg vil da starte med å hente toppen av stacken, som i dette tilfellet er det siste barnet/naboen fra toSearch. Lager en telle verdi, og setter denne til 1 siden vil telle med seg selv. Iterer over naboene til denne noden, og sjekker om mappet subtree har denne nøkkelen til verdien sin. Verdien er da noden, så hvis den ikke har denne verdien vil vi øke nøekkelen (størrelsen) på subTree. Altså sikrer at barn behandles før foreldre, og teller hvor mange noder som er festet til en foreldre. 
+Nodene i reversed-stacken blir behandlet i motsatt rekkefølge av hvordan de ble lagt til i toSearch. Dette betyr at vi starter med bladnodene og arbeider oss oppover mot foreldrene. For hver node starter vi med en størrelse på 1 (noden selv), og deretter itererer vi over naboene til denne noden. Hvis en nabo allerede har blitt behandlet (og har en verdi i subTree), legger vi til størrelsen på naboens undertre til nodens størrelse. På denne måten sikrer vi at alle barn er behandlet før foreldrene, og at vi får riktig antall noder i hvert undertre.
 
 deepestNodeWithMostChildren: 
 Starter med å hente størrelsen på den nåværende noden jeg jobber med, henter størrelsen fra subTree, altså størrelsen på hele subTreet.
@@ -49,57 +63,48 @@ Starter med å hente størrelsen på den nåværende noden jeg jobber med, hente
 Vet at hvis størrelsen er 1 for noden, så er dette en bladnode så returerer den nåværende noden. 
 bestScore holder på det største subtreet vi har funnet så langt blant barne nodene, og holder på den beste nden vi har funnet så langt. 
 
-Går da gjennom en for-løkke og sjekker om hvis størrelsem på subTree er større blant barnenoden enn den nåværende noden vi jobber med, ignorerer vi for å unngå å gå tilbake til en foreldre. Dersom subTreet sin score er bedre enn den beste scoren vi har funnet så langt, oppdaterer vi både bestScore og bestNode. 
+Går gjennom alle barne nodene til den nåværende noden vi jobber med. For hver barne-node sjekker vi størrelsen på undertrærne ved hjelp av subTree. 
 
-returnerer da noden med det største subTreet. 
+Hvis størrelsen på undertræret til en barne-node er større enn størrelsen på undertræret til den nåværende noden, ignorerer vi denne barne-noden, fordi dette indikerer at vi har kommet til en node med et større undertre, og vi ønsker ikke å gå tilbake til en foreldre.
 
-subTreeSize:
-Beregner subtestørrelsen i hele treet, blir brukt i deepestNodeWithMostChildren, som bruker dette til å finne den dypeste noden med det største subtreet, ved å sjekke størrelsen på barnenoder. Returnerer map som viser størrelsen på subTrerne for alle noder i treet. 
+Hvis undertræret til barne-noden er mindre enn eller likt størrelsen på undertræret til den nåværende noden, sammenligner vi det med den beste scoren vi har funnet så langt. Hvis dette undertræret har en større score enn den beste scoren (bestScore), oppdaterer vi både bestScore og bestNode til å reflektere dette nye beste funnet.
 
-addRenduntant: 
-Denne vil da finne de to nodene, som hvis vi legger til en kant mellom, vil minimere antall hus som mister strøm. 
-
-Starter med å lagre størrelsen for hver node i grafen i et map, et map hvor jeg kan slå opp og se hvor mange noder som finnes i subTreet til enhver node. Altså starter å utføre en DFS fra roten. 
-
-Hvis roten kun har en nabo, må vi finne den dypeste noden med flest barn, ved bruk av 'deepestNodeWithMostChildren'. (må gå dypere ned i treet for å finne en annen node å sammenligne med). Hvis roten har flere naboer må vi da gå gjennom alle nodene til root og henter størrelsen på barna sine subtrær fra subTre. Må deretter sammenligne subtrestørrelsene for å finne de to størse subtrærne. 
-
-Etter å ha funnet de to største subtrærne må vi finne den dypeste noden av disse som har flest barne noder. 
-
-til slutt returnerer vi en kant som kobler sammen disse nodene vi fant som kritiske 
+Returnerer da noden med det største subTreet/undertreet. 
 
 Oppsummering: 
-1. Beregner størrelse på subtrærne med DFS
-2. Finne de to største subtrærne
-3. For disse største subtrærene finner jeg noden med flest barn blant dem. 
-4. Returnerer kanten mellom de to nodene som er dypest og med flest barne-noder.
+1. Beregner størrelsen på undertrærne med DFS.
+2. Finner de to største undertærne.
+3. Finne noden med flest barn i de største undertrærne.
+4. Returnere en kant mellom de to mest kritiske nodene.
    *
-
 
 # Runtime Analysis
 For each method of the different strategies give a runtime analysis in Big-O notation and a description of why it has this runtime.
 
 **If you have implemented any helper methods you must add these as well.**
 
-* ``mst(WeightedGraph<T, E> g)``: O(?)
+* ``mst(WeightedGraph<T, E> g)``: O(mlogm)
     * Oppretter HasHset: O(1) tid. 
     Oppretter PrioriteyQueue som tar O(m) tid: Hvis jeg oppretter en tom prioritetskø vil det ta O(1) tid, men jeg oppretter en prioritetskø med alle kantene. Bruker Weightedgraph sin 'edges' metode, til å hente alle kanter i grafer.
 
     En for loop for å sjekke alle kanter som er knyttet til den første noden. Bruker da O(degree(v)) tid, ettersom 'g.adjacentEdges(vertex)' returnerer en en iterable av alle kanter som da tilhører til noden v. Sjekker kun de kantene som er koblet til noden, altså ikke alle m-kantene i grafen. Avhenger da av antall kanter som går fra noden v. 
 
-    O(degree(v)): for hver node
-    O(2m): for alle noder, sum av gradtall til hver node. 
-    add(): alltid kjøretid O(logm) for vi legger til alle kantene som vi har funnet, som da hører til denne noden vi har sjekket for. 
+    I værste fall vil en kant være koblet til n-1 kanter, n er noder i grafen. Kjøretiden for den noden være O(n). Men over hele grafen summeres kantene opp til O(m), siden alle er vurdert en gang. Hver kant vurderes en gang i løkken. 
+    - en node O(degree(v))
+    - vørste fall er nodens graf n-1
+    - over hele grafen summers kantene opp til O(m)
+
 
     while løkken tar O(m) tid ettersom den itererer over alle kantene i toSearch, altså iterer helt til denne er tom. 
 
-    poll() tar alltid O(logm) tid for prioritey queue
+    poll() tar alltid O(logm) tid for prioritey queue.
 
     found er et HashSet, og tar O(1) tid å sjekke om noe finnes og begge er uavhengige tar de O(1) tid. Igjen sjer dette i den andre if-setningen. O(1) tid. 
 
-    Deretter må jeg legge til kanten, hvis den ikke er i toSearch, igjen lignend for løkke som tidligere som da tar O(degree(b)) / O(2m), tid og O(log(m)) for å legge til denne kantne i toSearch. 
+    Deretter må jeg legge til kanten, hvis den ikke er i toSearch, igjen lignend for løkke som tidligere som da tar O(degree(b)), vil da totalt sett gå over hele grafen i O(m).
 
     Oppsummert:
-    O(mlogm)+O(mlogm)+O(mlogm)=O(mlogm)
+    Vi ser jo da ut ifra den største kjøretiden at den blir O(mlogm) kjøretid. Ser dette tydelig fra while løkken, samt at vi har utenom O(degree)*logm. Ser på den største kjøretiden. 
 
 
     **
@@ -114,12 +119,18 @@ For each method of the different strategies give a runtime analysis in Big-O not
 
     Så alt i alt tar dfs søket for et tre O(n) tid. 
 
-    lca vil jo da ta O(n) kjøretid, ettersom den kaller på dfs O(n) og har to seperate while løkker. While løkkene traverserer og må i værste fall da ta O(n) tid, gå gjennom alle nodene. 
+    lca: 
+    Den kaller på dfs som har kjørtid O(n), og har to seperate while løkker. While løkkene traverserer gjennom nodene og må i værste fall da ta O(n) tid, gå gjennom alle nodene. 
 
     O(n)+O(n)+O(n)=O(3n)=O(n)
-
-    Oppsummert: O(n)+O(n)=O(2n)=O(n)
     *
-* ``addRedundant(Graph<T> g, T root)``: O(?)
-    * *  *
+* ``addRedundant(Graph<T> g, T root)``: O(n)
+    * * 
+    SubTreeSize:
+    Alle externe operasjoner tar O(1) tid, men kaller da på calculatedepth for å kalkulere dybden som tar O(n) tid. 
+    
+    Calculatedepth:
+    while-løkken iterer over alle nodene i treet som tar O(n) tid. 
+    For-løkken iterer da over naboen til de nåværende nodene som tar O(degree(node)) tid for hver node, men siden summen totalt blir O(n) i et tre vil denne da ta O(n) tid. 
+     *
 

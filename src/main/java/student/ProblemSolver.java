@@ -15,7 +15,7 @@ import graph.WeightedGraph;
 public class ProblemSolver implements IProblem {
 
     @Override
-    public <V, E extends Comparable<E>> ArrayList<Edge<V>> mst(WeightedGraph<V, E> g) { //O(mlog(m))
+    public <V, E extends Comparable<E>> ArrayList<Edge<V>> mst(WeightedGraph<V, E> g) { //O(mlog(m)), spørs om n eller m er størst
         HashSet<V> found = new HashSet<>(); //O(1)
         PriorityQueue<Edge<V>> toSearch = new PriorityQueue<>(g); //O(m)
         ArrayList<Edge<V>> mst = new ArrayList<>(); //O(1)
@@ -23,7 +23,7 @@ public class ProblemSolver implements IProblem {
         V vertex = g.getFirstNode(); //O(1)
         found.add(vertex); //O(1)
 
-        for (Edge<V> edge : g.adjacentEdges(vertex)) { //O(degree(v))/2m
+        for (Edge<V> edge : g.adjacentEdges(vertex)) { //O(degree(v)  
             toSearch.add(edge); //O(log(m))
         }
         while (!toSearch.isEmpty()) { //O(m)
@@ -37,7 +37,7 @@ public class ProblemSolver implements IProblem {
                 mst.add(edge); //O(1)
                 found.add(edge.b); //O(1)
 
-                for (Edge<V> newEdge : g.adjacentEdges(edge.b)) { //O(degree(b))/2m
+                for (Edge<V> newEdge : g.adjacentEdges(edge.b)) { //O(degree(b))
                     toSearch.add(newEdge); //O(log(m))
                 }
             }
@@ -70,8 +70,7 @@ public class ProblemSolver implements IProblem {
         while (!toSearch.isEmpty()) { //O(n)
             V node = toSearch.pop(); //O(1)
 
-            for (V neighbor : g.neighbours(node)) {
-                ////O(m * degree(node)) = O(n) fordi tre har n-1 kanter. 
+            for (V neighbor : g.neighbours(node)) { //O(m * degree(node)) = O(n), tre har n-1 kanter. 
                 if (!parent.containsKey(neighbor)) { //O(1)
                     toSearch.push(neighbor); //O(1)
                     parent.put(neighbor, node); //O(1)
@@ -110,6 +109,7 @@ public class ProblemSolver implements IProblem {
 
         return new Edge<V>(firstNode, secondNode);
     }
+	
 
 	//Beregner størrelsen til alle noder i treet
     private <V> Map<V, Integer> SubTreeSize(Graph<V> g, V root) { //O(n)
@@ -124,14 +124,14 @@ public class ProblemSolver implements IProblem {
         Stack<V> toSearch = new Stack<>();  // O(1)
         Stack<V> reversed = new Stack<>();  //O(1)
 
-        toSearch.push(node);
-        found.add(node);
+        toSearch.push(node); //O(1)
+        found.add(node); //O(1)
 
         while (!toSearch.isEmpty()) { //O(n)
-            V currentNode = toSearch.pop();
-            reversed.push(currentNode);  
+            V currentNode = toSearch.pop(); //O(1)
+            reversed.push(currentNode);  //O(1)
 
-            for (V neighbour : g.neighbours(currentNode)) { //O(degree*n)=O(n)
+            for (V neighbour : g.neighbours(currentNode)) { //O(degree(currentNode))
                 if (!found.contains(neighbour)) {
                     toSearch.push(neighbour); 
                     found.add(neighbour);   
