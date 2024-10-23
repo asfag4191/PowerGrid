@@ -90,7 +90,7 @@ public class ProblemSolver implements IProblem {
         if (g.degree(root) == 1) {
             secondNode = deepestNodeWithMostChildren(g, subTree, root); //O(n)
         } else {
-            for (V node : g.neighbours(root)) { //O(degree)
+            for (V node : g.neighbours(root)) { //O(degree)/O(n)
                 Integer nodeSize = subTree.get(node); //O(1)
                 if (nodeSize > firstSubTree) { //O(1)
                     secondSubTree = firstSubTree; //O(1)
@@ -131,7 +131,7 @@ public class ProblemSolver implements IProblem {
             V currentNode = toSearch.pop(); //O(1)
             reversed.push(currentNode);  //O(1)
 
-            for (V neighbour : g.neighbours(currentNode)) { //O(degree(currentNode))
+            for (V neighbour : g.neighbours(currentNode)) { //O(degree(currentNode))/O(n)
                 if (!found.contains(neighbour)) {
                     toSearch.push(neighbour); 
                     found.add(neighbour);   
@@ -143,7 +143,7 @@ public class ProblemSolver implements IProblem {
             V nodeFromReversed = reversed.pop();
             int size = 1; 
 
-            for (V neighbour : g.neighbours(nodeFromReversed)) { //O(degree*n)=O(n)
+            for (V neighbour : g.neighbours(nodeFromReversed)) { //O(degree*n)/O(n)
                 if (subTree.containsKey(neighbour)) {
                     size += subTree.get(neighbour);  
                 }
@@ -155,21 +155,21 @@ public class ProblemSolver implements IProblem {
 	//Finner den noden som er lengst unna roten og har flest barn
     private <V> V deepestNodeWithMostChildren(Graph<V> g, Map<V, Integer> subTree, V currentNode) { //O(n)
         Integer currentScore = subTree.get(currentNode); //O(1)
-        if (currentScore == 1) {
-            return currentNode;  
+        if (currentScore == 1) { //O(1)
+            return currentNode; //O(1)
         }
-        Integer bestScore = 0;
-        V bestNode = currentNode;
+        Integer bestScore = 0; //O(1)
+        V bestNode = currentNode; //O(1)
 
-        for (V child : g.neighbours(currentNode)) { //O(degree)
-            Integer childScore = subTree.get(child); 
-            if (childScore > currentScore) {
-                continue; 
-             }else if (childScore > bestScore) {
-                bestScore = childScore;
-                bestNode = child;
+        for (V child : g.neighbours(currentNode)) { //O(degree(currentNode))/O(n)
+            Integer childScore = subTree.get(child);  //O(1)
+            if (childScore > currentScore) { //O(1)
+                continue;  //O(1)
+             }else if (childScore > bestScore) { //O(1)
+                bestScore = childScore; //O(1)
+                bestNode = child; //O(1)
             }
         }
-        return deepestNodeWithMostChildren(g, subTree, bestNode);
+        return deepestNodeWithMostChildren(g, subTree, bestNode); //O(n)
     }
 }
