@@ -152,8 +152,8 @@ public class ProblemSolver implements IProblem {
             subTree.put(nodeFromReversed, size); //O(1)
         }
     }
-    //Finner den noden som er lengst unna roten og har flest barn
-
+    
+	//Finds the deepest node with the most children
     private <V> V deepestNodeWithMostChildren(Graph<V> g, Map<V, Integer> subTree, V currentNode) { //O(n)
         Integer currentScore = subTree.get(currentNode); //O(1)
         if (currentScore == 1) { //O(1)
