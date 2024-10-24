@@ -15,7 +15,7 @@ import graph.WeightedGraph;
 public class ProblemSolver implements IProblem {
 
     @Override
-    public <V, E extends Comparable<E>> ArrayList<Edge<V>> mst(WeightedGraph<V, E> g) { //O(mlog(m)), spørs om n eller m er størst
+    public <V, E extends Comparable<E>> ArrayList<Edge<V>> mst(WeightedGraph<V, E> g) { //O(mlog(m))
         HashSet<V> found = new HashSet<>(); //O(1)
         PriorityQueue<Edge<V>> toSearch = new PriorityQueue<>(g); //O(m)
         ArrayList<Edge<V>> mst = new ArrayList<>(); //O(1)
@@ -109,17 +109,17 @@ public class ProblemSolver implements IProblem {
 
         return new Edge<V>(firstNode, secondNode);
     }
-	
 
-	//Beregner størrelsen til alle noder i treet
+    //Calculates the size of all nodes in the tree
     private <V> Map<V, Integer> SubTreeSize(Graph<V> g, V root) { //O(n)
         HashMap<V, Integer> subTree = new HashMap<>(); //O(1)
-        Set<V> found = new HashSet<>();  ///O(1)
+        Set<V> found = new HashSet<>();
+        ///O(1)
         Calculatedepth(g, root, found, subTree); //O(n)
         return subTree; //O(1)
     }
 
-	//Beregner dybden og størrelsen til alle noder i treet
+    //Calculates the depth and size of all nodes in the tree
     private <V> void Calculatedepth(Graph<V> g, V node, Set<V> found, Map<V, Integer> subTree) {
         Stack<V> toSearch = new Stack<>();  // O(1)
         Stack<V> reversed = new Stack<>();  //O(1)
@@ -133,26 +133,27 @@ public class ProblemSolver implements IProblem {
 
             for (V neighbour : g.neighbours(currentNode)) { //O(degree(currentNode))/O(n)
                 if (!found.contains(neighbour)) {
-                    toSearch.push(neighbour); 
-                    found.add(neighbour);   
+                    toSearch.push(neighbour);
+                    found.add(neighbour);
                 }
             }
         }
 
         while (!reversed.isEmpty()) { //O(n)
             V nodeFromReversed = reversed.pop();
-            int size = 1; 
+            int size = 1;
 
             for (V neighbour : g.neighbours(nodeFromReversed)) { //O(degree*n)/O(n)
                 if (subTree.containsKey(neighbour)) {
-                    size += subTree.get(neighbour);  
+                    size += subTree.get(neighbour);
                 }
             }
 
             subTree.put(nodeFromReversed, size); //O(1)
+        }
     }
-	}
-	//Finner den noden som er lengst unna roten og har flest barn
+    //Finner den noden som er lengst unna roten og har flest barn
+
     private <V> V deepestNodeWithMostChildren(Graph<V> g, Map<V, Integer> subTree, V currentNode) { //O(n)
         Integer currentScore = subTree.get(currentNode); //O(1)
         if (currentScore == 1) { //O(1)
@@ -165,7 +166,7 @@ public class ProblemSolver implements IProblem {
             Integer childScore = subTree.get(child);  //O(1)
             if (childScore > currentScore) { //O(1)
                 continue;  //O(1)
-             }else if (childScore > bestScore) { //O(1)
+            } else if (childScore > bestScore) { //O(1)
                 bestScore = childScore; //O(1)
                 bestNode = child; //O(1)
             }

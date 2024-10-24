@@ -6,8 +6,9 @@ Briefly describe your implementation of the different methods. What was your ide
 *Så at dette var et tilfelle av 'minimum spanning tree', så jeg valgte å bruke Prim's algoritme som vi har gått gjennom i forelesning. Denne vil da finne MST
 i en vektet graf, vil forbinde alle noder i et tre med minst vekt og ingen sykler. 
 
-Jeg har jo da 2 implementasjoner som jeg fokuserer på, found og toSearch. Found gjør jeg til å være et HashSet, siden jeg ikke vil legge til to noder som er 
-like. Gir meg rask kjøretid i tillegg. ToSearch gjør jeg til å være en PrioriteyQueue ettersom jeg vil søke etter kantene med minst vekt først. I prioritey queue blir dem sortert i stigende rekkefølge.  
+Jeg har jo da 2 implementasjoner som jeg fokuserer på, found og toSearch. Found gjør jeg til å være et HashSet, siden jeg ikke vil legge til to noder som er like. Gir meg rask kjøretid i tillegg. ToSearch gjør jeg til å være en PrioriteyQueue ettersom jeg vil søke etter kantene med minst vekt først. I prioritey queue blir dem sortert i stigende rekkefølge.  
+
+Hvis en kant allerede er i found, så vil det å legge til samme kant, skape sykel. Derfor bruker jeg hashset. 
 
 I tillegg må jeg oprette en ArrayList ettersom dette er listen med kantene vi vil returnere. 
 
@@ -73,6 +74,8 @@ if setningen oppdaterer derimot den beste scoren, den holder styr på hva denne 
 
 Etter å ha sammenlignet alle barnene til den nåværende noden så kaller jeg metoden rekrusivt på det beste barnet jeg fant. Går videre langs kanten som fører til flest undertrær, fortsetter slik helt til den har nådd en bladnode.  
 
+Rekrusjonen fortsetter jo helt til je kommer til bladnoden igjen. 
+
 Oppsummering: 
 1. Beregner størrelsen på undertrærne med DFS.
 2. Finner de to største undertærne.
@@ -91,11 +94,11 @@ For each method of the different strategies give a runtime analysis in Big-O not
 
     En for loop for å sjekke alle kanter som er knyttet til den første noden. Bruker da O(degree(v)) tid, ettersom 'g.adjacentEdges(vertex)' returnerer en en iterable av alle kanter som da tilhører til noden v. Sjekker kun de kantene som er koblet til noden, altså ikke alle m-kantene i grafen. Avhenger da av antall kanter som går fra noden v. 
 
-    I værste fall vil en kant være koblet til n-1 kanter, n er noder i grafen. Kjøretiden kan da være så høy som O(n) for en node. Hver kant vurderes en gang i løkken. 
-    - en node O(degree(v))
-    - vørste fall er nodens graf n-1
-    - over hele grafen summers kantene opp til O(m)
-    Totalt sett vill vi legge til hver kant en gang i prioritey queue, samlet tid på O(mlogm)
+    I værste fall vil en node være koblet til n-1 kanter, n er noder i grafen. Kjøretiden kan da være så høy som O(n) for en node. Hver kant vurderes en gang i løkken. 
+    - en node O(degree(v)), abhengig av antall noder. 
+    - Værste fall er noden koblet opp til O(n-1) kanter/O(n), og tilfelle i trær, som jeg kommer mer inn på og bruker i de andre oppgavene. 
+    - over hele grafen summers kantene opp til O(m), vurderer jo den en gang. 
+    Men i vårt tilfelle så avhenger det av antall naboer noden har og derfor skriver jeg opp O(degree(v))
 
     While løkken tar O(m) tid ettersom den itererer over alle kantene i toSearch, altså iterer helt til denne er tom. 
 
