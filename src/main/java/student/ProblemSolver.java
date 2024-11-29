@@ -20,24 +20,27 @@ public class ProblemSolver implements IProblem {
         PriorityQueue<Edge<V>> toSearch = new PriorityQueue<>(g); //O(m)
         ArrayList<Edge<V>> mst = new ArrayList<>(); //O(1)
 
-        V vertex = g.getFirstNode(); //O(1)
-        found.add(vertex); //O(1)
+        V vertex = g.getFirstNode(); //O(1), henter den første noden fra grafen g. 
+        found.add(vertex); //O(1), legger denne til i found, slik at vi ikke går gjennom den igjen.
 
-        for (Edge<V> edge : g.adjacentEdges(vertex)) { //O(degree(v)  
-            toSearch.add(edge); //O(log(m))
+        for (Edge<V> edge : g.adjacentEdges(vertex)) { //O(degree(v), iterer gjennom alle kantene til noden. 
+            toSearch.add(edge); //O(log(m)) , legger til kantene i toSearch, slik vi kan utforske videre. 
         }
         while (!toSearch.isEmpty()) { //O(m)
-            Edge<V> edge = toSearch.poll(); //O(log(m))
+            Edge<V> edge = toSearch.poll(); //O(log(m)), må hente ut kanten med lavest vekt, altså den første i køen.
 
-            if (found.contains(edge.a) && found.contains(edge.b)) { //O(1)
+            if (found.contains(edge.a) && found.contains(edge.b)) { //O(1), sjekker for sykler. 
                 continue; //O(1)
             }
 
-            if (!found.contains(edge.b)) { //O(1)
+            if (!found.contains(edge.b)) { //O(1) , hvis vi ikke har funnet noden før må vi legge den til i mst og found. 
                 mst.add(edge); //O(1)
                 found.add(edge.b); //O(1)
 
-                for (Edge<V> newEdge : g.adjacentEdges(edge.b)) { //O(degree(b))
+                //må kontinuerlig oppdatere toSearch, med nye kanter hver gang vi legger til en node. 
+                //uten denne vil den ikke kunne finne mst, vil ikke ha tilgang til kantene som forbinder mst. 
+                for (Edge<V> newEdge : g.adjacentEdges(edge.b)) { //O(degree(b)), iterer gjennom alle kantene til noden, 
+                    //slik vi kan legge de til i toSearch.
                     toSearch.add(newEdge); //O(log(m))
                 }
             }
@@ -62,17 +65,29 @@ public class ProblemSolver implements IProblem {
         return v; //O(1)
     }
 
+    //dfs søk som fyller opp parent mappet, slik at vi kan finne foreldre til nodene
+    // Vi bruker en stack for å utforske nodene i dybden før vi går videre til neste nivå.
     private <V> void dfs(Graph<V> g, V root, Map<V, V> parent) { //O(n)
-        Stack<V> toSearch = new Stack<>(); //O(1)
+        //hvilke noder vi skal utforske
+        Stack<V> toSearch = new Stack<>(); //O(1) 
+        //startpunkt for DFS
         toSearch.push(root); //O(1)
-        parent.put(root, null); //O(1)
+        // Setter root til å ha null som forelder, siden den er utgangspunktet for søket (startnoden i DFS).
+        // null representerer fravær av en foreldre
+        parent.put(root, null); //O(1) 
 
-        while (!toSearch.isEmpty()) { //O(n)
-            V node = toSearch.pop(); //O(1)
+        //så lenge det er noder vi skal utforske
+        while (!toSearch.isEmpty()) { //O(n) 
+            //henter ut noden vi skal utforske, fjerner den fra stacken, slik vi ikke går gjennom den igjen.
+            V node = toSearch.pop(); //O(1) 
 
-            for (V neighbor : g.neighbours(node)) { //O(m * degree(node)) = O(n), tre har n-1 kanter. 
+            //iterer gjennom alle naboene til noden. 
+            for (V neighbor : g.neighbours(node)) { //O(m * degree(node)) = O(n), tre har n-1 kanter.  Går gjennom alle nodene til nabeon
+                //Sjekker om noden har en forelder i mappet, hvis ikke legger vi den til. 
                 if (!parent.containsKey(neighbor)) { //O(1)
+                    //legger til noden i stacken, slik vi kan utforske den senere.
                     toSearch.push(neighbor); //O(1)
+                    //setter noden vi utforsker til å ha noden vi kom fra som forelder.
                     parent.put(neighbor, node); //O(1)
                 }
             }
